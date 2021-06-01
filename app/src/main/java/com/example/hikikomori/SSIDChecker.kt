@@ -10,9 +10,13 @@ class SSIDChecker(private val context: Context) {
     fun checkSSID(registedSSID: String): Boolean {
 
         if (wifiManager.wifiState == WifiManager.WIFI_STATE_ENABLED) {
-            val connectedSSID = wifiManager.scanResults[1].SSID
-            println("connectedSSID: $connectedSSID")
-            return Regex(registedSSID).containsMatchIn(connectedSSID)
+            var results = wifiManager.scanResults
+            if (!results.isEmpty()) {
+                var connectedSSID = results[1].SSID
+                println("connectedSSID: $connectedSSID")
+                return Regex(registedSSID).containsMatchIn(connectedSSID)
+            }
+            return false
         } else {
             println("connectedSSID: none")
             return false
