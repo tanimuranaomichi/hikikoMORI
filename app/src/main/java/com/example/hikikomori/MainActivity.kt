@@ -22,7 +22,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-<<<<<<< HEAD
         val totalTime = findViewById<TextView>(R.id.totalTime)
         val level = findViewById<TextView>(R.id.level)
         val imageOfTree = findViewById<ImageView>(R.id.tree)
@@ -53,8 +52,6 @@ class MainActivity : AppCompatActivity() {
                 handler.postDelayed(this, 1000)
             }
         }
-=======
->>>>>>> f7e733c374f19618d185560f9b973ad9a244e659
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
@@ -73,7 +70,6 @@ class MainActivity : AppCompatActivity() {
                 );
             }
         }
-<<<<<<< HEAD
         handler.post(runnable)
     }
 
@@ -90,14 +86,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-=======
-
-        val ssidChecker = SSIDChecker(this)
-        if (ssidChecker.checkSSID("ogatalab")) {
-        }
-    }
-    
->>>>>>> f7e733c374f19618d185560f9b973ad9a244e659
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
