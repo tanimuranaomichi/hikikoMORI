@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         val totalTime = findViewById<TextView>(R.id.totalTime)
         val level = findViewById<TextView>(R.id.level)
         val imageOfTree = findViewById<ImageView>(R.id.treeLayer)
+        val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
         loadData()
 
@@ -75,12 +77,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
         handler.post(runnable)
+
+        tweetButton.setOnClickListener{println("PUSH")}
     }
 
     override fun onPause() {
         super.onPause()
 
         saveData()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.setting -> {
+            }
+        }
+        return true
     }
 
     private fun timeToText(time: Int = 0): String? {
@@ -111,19 +128,6 @@ class MainActivity : AppCompatActivity() {
         getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
             timeValue = getInt("timeValue",0)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.setting -> {
-            }
-        }
-        return true
     }
 
 }
