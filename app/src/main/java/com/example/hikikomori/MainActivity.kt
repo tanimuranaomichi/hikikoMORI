@@ -1,6 +1,7 @@
 package com.example.hikikomori
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,23 +12,25 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-
 val handler = Handler()
 var timeValue = 0
 
-
 class MainActivity : AppCompatActivity() {
+
     private val PERMISSIONS_REQUEST_CODE = 1
+    private val ssidChecker = SSIDChecker(this)
+    private val levelManager = LevelManager()
+    private var stateOfConnection = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         val totalTime = findViewById<TextView>(R.id.totalTime)
         val level = findViewById<TextView>(R.id.level)
-        val imageOfTree = findViewById<ImageView>(R.id.tree)
-        val ssidChecker = SSIDChecker(this)
-        val levelManager = LevelManager()
-        var stateOfConnection = false
+        val imageOfTree = findViewById<ImageView>(R.id.treeLayer)
+
+        loadData()
 
         val runnable = object : Runnable {
             override fun run() {
@@ -39,6 +42,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 if (stateOfConnection == true) {
                     timeValue++
+
                     timeToText(timeValue)?.let {
                         totalTime.text = "ひきこ森タイム" + it
                     }
@@ -73,6 +77,12 @@ class MainActivity : AppCompatActivity() {
         handler.post(runnable)
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        saveData()
+    }
+
     private fun timeToText(time: Int = 0): String? {
         return if (time < 0) {
             null
@@ -83,6 +93,23 @@ class MainActivity : AppCompatActivity() {
             val m = time % 3600 / 60
             val s = time % 60
             "%1$02d:%2$02d:%3$02d".format(h, m, s)
+        }
+    }
+
+    private fun saveData() {
+        println("SAVE")
+
+        getSharedPreferences("my_settings", Context.MODE_PRIVATE).edit().apply {
+            putInt("timeValue", timeValue)
+            commit()
+        }
+    }
+
+    private fun loadData() {
+        println("LOAD")
+
+        getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
+            timeValue = getInt("timeValue",0)
         }
     }
 

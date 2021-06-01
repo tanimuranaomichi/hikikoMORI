@@ -20,7 +20,8 @@ class LevelManager {
             7 -> R.drawable.tree_7
             8 -> R.drawable.tree_8
             9 -> R.drawable.tree_9
-            else -> R.drawable.tree_10
+            10 -> R.drawable.tree_10
+            else -> R.drawable.tree_max
         }
 
         return drawableResource

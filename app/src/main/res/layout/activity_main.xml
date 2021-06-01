@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/haikei"
+        android:id="@+id/background"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="centerCrop"
@@ -18,7 +18,7 @@
         app:srcCompat="@drawable/background" />
 
     <ImageView
-        android:id="@+id/tree"
+        android:id="@+id/treeLayer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
