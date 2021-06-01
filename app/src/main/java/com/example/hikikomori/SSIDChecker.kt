@@ -5,7 +5,7 @@ import android.net.wifi.WifiManager
 
 
 class SSIDChecker(private val context: Context) {
-private val wifiManager: WifiManager get() = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    val wifiManager: WifiManager get() = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
     fun checkSSID(registedSSID: String): Boolean {
 
@@ -14,6 +14,7 @@ private val wifiManager: WifiManager get() = context.applicationContext.getSyste
             println("connectedSSID: $connectedSSID")
             return Regex(registedSSID).containsMatchIn(connectedSSID)
         } else {
+            println("connectedSSID: none")
             return false
         }
 

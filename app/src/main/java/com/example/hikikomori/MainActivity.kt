@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+
 
 val handler = Handler()
 var timeValue = 0
@@ -20,15 +22,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val totalTime = findViewById<TextView>(R.id.totalTime)
+        val level = findViewById<TextView>(R.id.level)
+        val imageOfTree = findViewById<ImageView>(R.id.tree)
+        val ssidChecker = SSIDChecker(this)
+        val levelManager = LevelManager()
+        var stateOfConnection = false
+
         val runnable = object : Runnable {
             override fun run() {
-                timeValue++
-
-                timeToText(timeValue)?.let {
-                    totalTime.text = it
+                if (!stateOfConnection && ssidChecker.checkSSID("ogatalab")) {
+                    stateOfConnection = true
                 }
+                if (stateOfConnection && !ssidChecker.checkSSID("ogatalab")) {
+                    stateOfConnection = false
+                }
+                if (stateOfConnection == true) {
+                    timeValue++
+                    timeToText(timeValue)?.let {
+                        totalTime.text = "ひきこ森タイム" + it
+                    }
+
+                    levelManager.timeToLevel(timeValue)?.let {
+                        level.text = "ひきこ森レベル" + it.toString() + "ha"
+                    }
+                }
+
+                imageOfTree.setImageResource(levelManager.getImageOfTree())
                 handler.postDelayed(this, 1000)
             }
         }
@@ -44,15 +64,13 @@ class MainActivity : AppCompatActivity() {
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_WIFI_STATE,
-                        Manifest.permission.ACCESS_NETWORK_STATE),
-                    PERMISSIONS_REQUEST_CODE);
+                        Manifest.permission.ACCESS_NETWORK_STATE
+                    ),
+                    PERMISSIONS_REQUEST_CODE
+                );
             }
         }
-
-        val ssidChecker = SSIDChecker(this)
-        if (ssidChecker.checkSSID("ogatalab")) {
-            handler.post(runnable)
-        }
+        handler.post(runnable)
     }
 
     private fun timeToText(time: Int = 0): String? {
@@ -67,6 +85,7 @@ class MainActivity : AppCompatActivity() {
             "%1$02d:%2$02d:%3$02d".format(h, m, s)
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
