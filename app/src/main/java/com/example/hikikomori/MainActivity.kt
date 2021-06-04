@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             override fun run() {
                 if (ssidChecker.checkSSID()) {
                     timeValue++
+                    saveTimeValue()
                 }
                 timeToText(timeValue)?.let {
                     totalTimeText.text = "ひきこ森タイム" + it
@@ -84,12 +85,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         handler.post(runnable)
 
         tweetButton.setOnClickListener { tweet() }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        saveTimeValue()
     }
 
     override fun onDestroy() {
