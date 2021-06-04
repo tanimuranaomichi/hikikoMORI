@@ -145,20 +145,24 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun tweet() {
-        launch {
+        if (accessToken == "" || accessTokenSecret == "") {
+            loginTwitterAccount()
+        } else {
+            launch {
 
-            async(context = Dispatchers.IO) {
-                val cb = ConfigurationBuilder()
-                cb.setDebugEnabled(true)
-                    .setOAuthConsumerKey("5URc3izBLHpEPzZMr8z9AqSby")
-                    .setOAuthConsumerSecret("psCEExAKIcfViAdF6ougrI13DCJig8zYLCoyYtMQDf2LSW4gfd")
-                    .setOAuthAccessToken(accessToken)
-                    .setOAuthAccessTokenSecret(accessTokenSecret)                //各種キーの設定
+                async(context = Dispatchers.IO) {
+                    val cb = ConfigurationBuilder()
+                    cb.setDebugEnabled(true)
+                        .setOAuthConsumerKey("5URc3izBLHpEPzZMr8z9AqSby")
+                        .setOAuthConsumerSecret("psCEExAKIcfViAdF6ougrI13DCJig8zYLCoyYtMQDf2LSW4gfd")
+                        .setOAuthAccessToken(accessToken)
+                        .setOAuthAccessTokenSecret(accessTokenSecret)                //各種キーの設定
 
-                val tf = TwitterFactory(cb.build())
-                val twitter = tf.instance
-                twitter.updateStatus("私のひきこ森レベルは" + levelManager.level + " haです！ #hikikoMORI")    //ツイートの投稿
-            }.await()
+                    val tf = TwitterFactory(cb.build())
+                    val twitter = tf.instance
+                    twitter.updateStatus("私のひきこ森レベルは" + levelManager.level + " haです！ #hikikoMORI")    //ツイートの投稿
+                }.await()
+            }
         }
     }
 
