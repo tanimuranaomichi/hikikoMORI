@@ -1,7 +1,7 @@
 package com.example.hikikomori
 
 class LevelManager {
-    private var level = 0
+    var level = 0
 
     fun timeToLevel(time: Int = 0): Int {
         level = time / 10// デモ用.本番はtime /100とする

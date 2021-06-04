@@ -2,7 +2,9 @@ package com.example.hikikomori
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,16 +14,38 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.*
+import twitter4j.TwitterFactory
+import twitter4j.auth.OAuthAuthorization
+import twitter4j.auth.RequestToken
+import twitter4j.conf.ConfigurationBuilder
+import twitter4j.conf.ConfigurationContext
+import java.lang.Runnable
+import kotlin.coroutines.CoroutineContext
 
 val handler = Handler()
 var timeValue = 0
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private val PERMISSIONS_REQUEST_CODE = 1
     private val ssidChecker = SSIDChecker(this)
     private val levelManager = LevelManager()
     private var stateOfConnection = false
+    private var accessToken = ""
+    private var accessTokenSecret = ""
+    //コルーチンを使うための準備
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
+    //認証オブジェクトの作成
+    companion object {
+        val mOauth = OAuthAuthorization(ConfigurationContext.getInstance())
+        lateinit var mRequest: RequestToken
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         val imageOfTree = findViewById<ImageView>(R.id.treeLayer)
         val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
-        loadData()
+        loadTimeValue()
 
         val runnable = object : Runnable {
             override fun run() {
@@ -62,13 +86,18 @@ class MainActivity : AppCompatActivity() {
         getPermission()
         handler.post(runnable)
 
-        tweetButton.setOnClickListener{println("PUSH")}
+        tweetButton.setOnClickListener{tweet()}
     }
 
     override fun onPause() {
         super.onPause()
 
-        saveData()
+        saveTimeValue()
+    }
+
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -78,7 +107,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.setting -> {
+            R.id.setting_SSID -> {
+            }
+            R.id.login_twitter -> {
+                loginTwitterAccount()
             }
         }
         return true
@@ -97,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveData() {
+    private fun saveTimeValue() {
         println("SAVE")
 
         getSharedPreferences("my_settings", Context.MODE_PRIVATE).edit().apply {
@@ -106,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadData() {
+    private fun loadTimeValue() {
         println("LOAD")
 
         getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
@@ -131,6 +163,56 @@ class MainActivity : AppCompatActivity() {
                     PERMISSIONS_REQUEST_CODE
                 );
             }
+        }
+    }
+
+    private fun tweet() {
+        println("PUSH")
+        launch {
+
+            loadTwitterToken()
+
+            async(context = Dispatchers.IO) {
+                val cb = ConfigurationBuilder()
+                cb.setDebugEnabled(true)
+                    .setOAuthConsumerKey("5URc3izBLHpEPzZMr8z9AqSby")
+                    .setOAuthConsumerSecret("psCEExAKIcfViAdF6ougrI13DCJig8zYLCoyYtMQDf2LSW4gfd")
+                    .setOAuthAccessToken(accessToken)
+                    .setOAuthAccessTokenSecret(accessTokenSecret)                //各種キーの設定
+
+                val tf = TwitterFactory(cb.build())
+                val twitter = tf.getInstance()
+                twitter.updateStatus("私のひきこ森レベルは"+levelManager.level+" haです！ #hikikoMORI")    //ツイートの投稿
+            }.await()
+        }
+    }
+
+    private fun loadTwitterToken(){
+        println("LOAD")
+
+        getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
+            accessToken = getString("token","").toString()
+            accessTokenSecret = getString("tokenSecret","").toString()
+        }
+    }
+
+    private fun loginTwitterAccount() {
+        launch {
+            mOauth.setOAuthConsumer(
+                "5URc3izBLHpEPzZMr8z9AqSby",
+                "psCEExAKIcfViAdF6ougrI13DCJig8zYLCoyYtMQDf2LSW4gfd"
+            )
+            mOauth.oAuthAccessToken = null
+            var uri: Uri?
+
+            async(context = Dispatchers.IO) {
+                mRequest = mOauth.getOAuthRequestToken("callback://CallBackActivity")    //コールバックの設定
+
+                var intent = Intent(Intent.ACTION_VIEW)
+                uri = Uri.parse(mRequest.authenticationURL)
+                intent.data = uri
+                startActivityForResult(intent, 0)            //暗黙インテントでWebブラウザを呼び出して認証
+            }                                                //認証情報を受け取るためにstartActivityForResult()
         }
     }
 }

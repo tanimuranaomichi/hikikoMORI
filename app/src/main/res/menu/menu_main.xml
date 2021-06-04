@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/setting"
-        android:title="SETTING" />
+        android:id="@+id/setting_SSID"
+        android:title="Setting your SSID" />
+    <item
+        android:id="@+id/login_twitter"
+        android:title="Login your Twitter Account" />
 </menu>
