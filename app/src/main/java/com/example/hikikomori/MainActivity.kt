@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private var stateOfConnection = false
     private var accessToken = ""
     private var accessTokenSecret = ""
+    private var registeredSSID = ""
+
     //コルーチンを使うための準備
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -57,28 +59,35 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
         loadTimeValue()
+        loadRegisteredSSID()
+
+        timeToText(timeValue)?.let {
+            totalTime.text = "ひきこ森タイム" + it
+        }
+        levelManager.timeToLevel(timeValue)?.let {
+            level.text = "ひきこ森レベル" + it.toString() + "ha"
+        }
 
         val runnable = object : Runnable {
             override fun run() {
-                if (!stateOfConnection && ssidChecker.checkSSID("ogatalab")) {
+                if (!stateOfConnection && ssidChecker.checkSSID(registeredSSID)) {
                     stateOfConnection = true
                 }
-                if (stateOfConnection && !ssidChecker.checkSSID("ogatalab")) {
+                if (stateOfConnection && !ssidChecker.checkSSID(registeredSSID)) {
                     stateOfConnection = false
                 }
                 if (stateOfConnection == true) {
                     timeValue++
-
-                    timeToText(timeValue)?.let {
-                        totalTime.text = "ひきこ森タイム" + it
-                    }
-
-                    levelManager.timeToLevel(timeValue)?.let {
-                        level.text = "ひきこ森レベル" + it.toString() + "ha"
-                    }
+                }
+                timeToText(timeValue)?.let {
+                    totalTime.text = "ひきこ森タイム" + it
                 }
 
+                levelManager.timeToLevel(timeValue)?.let {
+                    level.text = "ひきこ森レベル" + it.toString() + "ha"
+                }
                 imageOfTree.setImageResource(levelManager.getImageOfTree())
+
                 handler.postDelayed(this, 1000)
             }
         }
@@ -88,6 +97,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         tweetButton.setOnClickListener{tweet()}
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -108,6 +118,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.setting_SSID -> {
+                val intent = Intent(application, RegisterSSIDActivity::class.java)
+                startActivity(intent)
             }
             R.id.login_twitter -> {
                 loginTwitterAccount()
@@ -215,4 +227,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             }                                                //認証情報を受け取るためにstartActivityForResult()
         }
     }
+
+    private fun loadRegisteredSSID() {
+        getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
+            registeredSSID = getString("registeredSSID","").toString()
+        }
+    }
+
 }
