@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private val levelManager = LevelManager()
     private var accessToken = ""
     private var accessTokenSecret = ""
+    lateinit var runnable: Runnable
 
 
     //コルーチンを使うための準備
@@ -56,14 +57,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         loadData()
 
-        timeToText(timeValue)?.let {
-            totalTimeText.text = "ひきこ森タイム" + it
-        }
-        levelManager.timeToLevel(timeValue)?.let {
-            levelText.text = "ひきこ森レベル" + it.toString() + "ha"
-        }
-
-        val runnable = object : Runnable {
+        runnable = object : Runnable {
             override fun run() {
                 if (ssidChecker.checkSSID()) {
                     timeValue++
@@ -85,6 +79,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         handler.post(runnable)
 
         tweetButton.setOnClickListener { tweet() }
+    }
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(runnable)
     }
 
     override fun onDestroy() {
@@ -193,8 +191,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun saveTimeValue() {
-        println("SAVE")
-
         getSharedPreferences("my_settings", Context.MODE_PRIVATE).edit().apply {
             putInt("timeValue", timeValue)
             commit()
