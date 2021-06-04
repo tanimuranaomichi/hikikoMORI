@@ -28,13 +28,11 @@ var timeValue = 0
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
-    private val PERMISSIONS_REQUEST_CODE = 1
     private val ssidChecker = SSIDChecker(this)
     private val levelManager = LevelManager()
-    private var stateOfConnection = false
     private var accessToken = ""
     private var accessTokenSecret = ""
-    private var registeredSSID = ""
+
 
     //コルーチンを使うための準備
     private val job = Job()
@@ -47,8 +45,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         lateinit var mRequest: RequestToken
     }
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,8 +54,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val imageOfTree = findViewById<ImageView>(R.id.treeLayer)
         val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
-        loadTimeValue()
-        loadRegisteredSSID()
+        loadData()
 
         timeToText(timeValue)?.let {
             totalTime.text = "ひきこ森タイム" + it
@@ -70,19 +65,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         val runnable = object : Runnable {
             override fun run() {
-                if (!stateOfConnection && ssidChecker.checkSSID(registeredSSID)) {
-                    stateOfConnection = true
-                }
-                if (stateOfConnection && !ssidChecker.checkSSID(registeredSSID)) {
-                    stateOfConnection = false
-                }
-                if (stateOfConnection == true) {
+                if (ssidChecker.checkSSID()) {
                     timeValue++
                 }
                 timeToText(timeValue)?.let {
                     totalTime.text = "ひきこ森タイム" + it
                 }
-
                 levelManager.timeToLevel(timeValue)?.let {
                     level.text = "ひきこ森レベル" + it.toString() + "ha"
                 }
@@ -95,9 +83,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         getPermission()
         handler.post(runnable)
 
-        tweetButton.setOnClickListener{tweet()}
+        tweetButton.setOnClickListener { tweet() }
     }
-
 
     override fun onPause() {
         super.onPause()
@@ -141,24 +128,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    private fun saveTimeValue() {
-        println("SAVE")
+    private fun getPermission() {
+        val PERMISSIONS_REQUEST_CODE = 1
 
-        getSharedPreferences("my_settings", Context.MODE_PRIVATE).edit().apply {
-            putInt("timeValue", timeValue)
-            commit()
-        }
-    }
-
-    private fun loadTimeValue() {
-        println("LOAD")
-
-        getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
-            timeValue = getInt("timeValue",0)
-        }
-    }
-
-    private fun getPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
@@ -179,10 +151,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun tweet() {
-        println("PUSH")
         launch {
-
-            loadTwitterToken()
 
             async(context = Dispatchers.IO) {
                 val cb = ConfigurationBuilder()
@@ -194,17 +163,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
                 val tf = TwitterFactory(cb.build())
                 val twitter = tf.getInstance()
-                twitter.updateStatus("私のひきこ森レベルは"+levelManager.level+" haです！ #hikikoMORI")    //ツイートの投稿
+                twitter.updateStatus("私のひきこ森レベルは" + levelManager.level + " haです！ #hikikoMORI")    //ツイートの投稿
             }.await()
-        }
-    }
-
-    private fun loadTwitterToken(){
-        println("LOAD")
-
-        getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
-            accessToken = getString("token","").toString()
-            accessTokenSecret = getString("tokenSecret","").toString()
         }
     }
 
@@ -228,9 +188,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    private fun loadRegisteredSSID() {
+    private fun loadData() {
         getSharedPreferences("my_settings", Context.MODE_PRIVATE).apply {
-            registeredSSID = getString("registeredSSID","").toString()
+            timeValue = getInt("timeValue", 0)
+            ssidChecker.registeredSSID = getString("registeredSSID", "").toString()
+            accessToken = getString("token", "").toString()
+            accessTokenSecret = getString("tokenSecret", "").toString()
+        }
+    }
+
+    private fun saveTimeValue() {
+        println("SAVE")
+
+        getSharedPreferences("my_settings", Context.MODE_PRIVATE).edit().apply {
+            putInt("timeValue", timeValue)
+            commit()
         }
     }
 
