@@ -49,18 +49,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val totalTime = findViewById<TextView>(R.id.totalTime)
-        val level = findViewById<TextView>(R.id.level)
-        val imageOfTree = findViewById<ImageView>(R.id.treeLayer)
+        val totalTimeText = findViewById<TextView>(R.id.totalTime)
+        val levelText = findViewById<TextView>(R.id.level)
+        val treeImage = findViewById<ImageView>(R.id.treeLayer)
         val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
         loadData()
 
         timeToText(timeValue)?.let {
-            totalTime.text = "ひきこ森タイム" + it
+            totalTimeText.text = "ひきこ森タイム" + it
         }
         levelManager.timeToLevel(timeValue)?.let {
-            level.text = "ひきこ森レベル" + it.toString() + "ha"
+            levelText.text = "ひきこ森レベル" + it.toString() + "ha"
         }
 
         val runnable = object : Runnable {
@@ -69,12 +69,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     timeValue++
                 }
                 timeToText(timeValue)?.let {
-                    totalTime.text = "ひきこ森タイム" + it
+                    totalTimeText.text = "ひきこ森タイム" + it
                 }
                 levelManager.timeToLevel(timeValue)?.let {
-                    level.text = "ひきこ森レベル" + it.toString() + "ha"
+                    levelText.text = "ひきこ森レベル" + it.toString() + "ha"
                 }
-                imageOfTree.setImageResource(levelManager.getImageOfTree())
+                treeImage.setImageResource(levelManager.getTreeImage())
 
                 handler.postDelayed(this, 1000)
             }

@@ -8,7 +8,7 @@ class LevelManager {
         return level
     }
 
-    fun getImageOfTree(): Int {
+    fun getTreeImage(): Int {
         val drawableResource = when (level) {
             0 -> R.drawable.tree_0
             1 -> R.drawable.tree_1
