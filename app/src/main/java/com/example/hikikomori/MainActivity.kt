@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                 timeToText(timeValue)?.let {
                     totalTimeText.text = "ひきこ森タイム" + it
                 }
-                levelManager.timeToLevel(timeValue)?.let {
+                levelManager.timeToLevel(timeValue).let {
                     levelText.text = "ひきこ森レベル" + it.toString() + "ha"
                 }
                 treeImage.setImageResource(levelManager.getTreeImage())
@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         tweetButton.setOnClickListener { tweet() }
     }
+
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(runnable)
@@ -138,7 +139,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                         Manifest.permission.ACCESS_NETWORK_STATE
                     ),
                     PERMISSIONS_REQUEST_CODE
-                );
+                )
             }
         }
     }
@@ -155,7 +156,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     .setOAuthAccessTokenSecret(accessTokenSecret)                //各種キーの設定
 
                 val tf = TwitterFactory(cb.build())
-                val twitter = tf.getInstance()
+                val twitter = tf.instance
                 twitter.updateStatus("私のひきこ森レベルは" + levelManager.level + " haです！ #hikikoMORI")    //ツイートの投稿
             }.await()
         }
