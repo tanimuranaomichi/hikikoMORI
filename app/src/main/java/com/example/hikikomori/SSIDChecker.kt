@@ -15,7 +15,8 @@ class SSIDChecker(private val context: Context) {
             if (!results.isEmpty()) {
                 var connectedSSID = results[1].SSID
                 println("connectedSSID: $connectedSSID / registeredSSID: $registeredSSID")
-                return registeredSSID == connectedSSID
+//                return registeredSSID == connectedSSID
+                return Regex(registeredSSID).containsMatchIn(connectedSSID)
             }
             return false
         } else {

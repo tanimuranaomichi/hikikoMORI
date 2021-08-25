@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         val totalTimeText = findViewById<TextView>(R.id.totalTime)
         val levelText = findViewById<TextView>(R.id.level)
         val treeImage = findViewById<ImageView>(R.id.treeLayer)
+        val animalImage = findViewById<ImageView>(R.id.animalLayer)
+        val birdImage = findViewById<ImageView>(R.id.birdLayer)
         val tweetButton = findViewById<ImageButton>(R.id.tweetButton)
 
         loadData()
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     levelText.text = "ひきこ森レベル" + it.toString() + "ha"
                 }
                 treeImage.setImageResource(levelManager.getTreeImage())
+                animalImage.setImageResource(levelManager.getAnimalImage())
+                birdImage.setImageResource(levelManager.getBirdImage())
 
                 handler.postDelayed(this, 1000)
             }
